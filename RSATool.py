@@ -144,6 +144,24 @@ class RsaTool:
         deString=rsa.decrypt(enMessage,prikeyString)
         print(deString.decode('utf-8'))
         return deString.decode('utf-8')
+    def signMessage(self,prikey,sigmsg):
+        hash=rsa.compute_hash(sigmsg.encode('utf-8'),'SHA-1')
+        signature=rsa.sign_hash(hash,prikey,'SHA-1')
+        signdata=base64.b64encode(signature)
+
+        #print(signdata)
+        return signdata
+    def verifySign(self,pub,sigmsg,sigString):
+        #print(base64.b64decode(sigmsg.encode('utf-8')))
+        sigmsg=base64.b64decode(sigmsg.encode('utf-8'))
+        try:
+            rsa.verify(sigString.encode('utf-8'),sigmsg,pub)
+
+            return True
+        except Exception as e:
+            print(f'验签失败:{e}')
+            return False
+
 
 if __name__ == '__main__':
     keys=RsaTool(1024)
@@ -152,5 +170,10 @@ if __name__ == '__main__':
     message=' Python 的面向对象开发过程中,对象的某些方法或者称为函数只想在对象的内部被使用,但不想在外部被访问到这些方法或函数。 即:私有方法是对象不愿意公开的方法或函数'
     pri='D:\myfile\keys\prikey.pem'
     prikey=keys.readPriKey(pri)
-    enmsg=keys.enStringWthPub(message,pubkey)
-    demsg=keys.decryptMessage(enmsg,prikey)
+    #enmsg=keys.enStringWthPub(message,pubkey)
+    #demsg=keys.decryptMessage(enmsg,prikey)
+    messages='hello'
+    signdata=keys.signMessage(prikey,messages).decode('utf-8')
+    #print(signdata)
+    msg1='hello'
+    print(keys.verifySign(pubkey,signdata,msg1))
